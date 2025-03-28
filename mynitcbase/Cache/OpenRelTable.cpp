@@ -302,29 +302,44 @@ int OpenRelTable::closeRel(int relId) {
   	if (tableMetaInfo[relId].free) return E_RELNOTOPEN;
 
 	if (RelCacheTable::relCache[relId]->dirty == true) {
-		/* Get the Relation Catalog entry from RelCacheTable::relCache
-		Then convert it to a record using RelCacheTable::relCatEntryToRecord(). */
-		Attribute relCatBuffer [RELCAT_NO_ATTRS];
-		RelCacheTable::relCatEntryToRecord(&(RelCacheTable::relCache[relId]->relCatEntry), relCatBuffer);
+		//declare the record that will store the relcatentry of the table whole metadata you want to update
+		Attribute relCatrecord [RELCAT_NO_ATTRS];
+		//convert the relcatentry to the record by getting the record form the relcache[relid]->relcatentry
+		RelCacheTable::relCatEntryToRecord(&(RelCacheTable::relCache[relId]->relCatEntry), relCatrecord);
 
-		// declaring an object of RecBuffer class to write back to the buffer
-		RecId recId = RelCacheTable::relCache[relId]->recId;
-		RecBuffer relCatBlock(recId.block);
+//access the block and slot in which the origin info is stored the relcat block
+		RecId relrecId = RelCacheTable::relCache[relId]->recId;
+		RecBuffer relCatBlock(relrecId.block);
 
 		// Write back to the slot using relCatBlock.setRecord() with recId.slot
-		relCatBlock.setRecord(relCatBuffer, RelCacheTable::relCache[relId]->recId.slot);
+		relCatBlock.setRecord(relCatrecord, RelCacheTable::relCache[relId]->recId.slot);
 	}
 
 	// free the memory allocated in the relation and attribute caches which was
 	// allocated in the OpenRelTable::openRel() function
 	free (RelCacheTable::relCache[relId]);
+
+	/**to write back the changes of the attribute cache----- */
+	//access the attributes of that relation to check which all atributes metadata has been modified 
+	AttrCacheEntry *attrcacheentry=AttrCacheTable::attrCache[relId];
+	while(attrcacheentry){
+		//if edited
+		if(attrcacheentry->dirty==true){
+			//create a record that will store the attrcatinfo
+			Attribute attrcatrecord[ATTRCAT_NO_ATTRS];
+			//convert to record 
+			AttrCacheTable::attrCatEntryToRecord(&(AttrCacheTable::attrCache[relId]->attrCatEntry),attrcatrecord);
+			//access the block and slot 
+			RecId attrrec=AttrCacheTable::attrCache[relId]->recId;
+			//access the block
+			RecBuffer attrcatblock(attrrec.block);
+			//set the record back
+			attrcatblock.setRecord(attrcatrecord,attrrec.slot);
+		}
+		attrcacheentry=attrcacheentry->next;
+	}
 	
-	// // RelCacheEntry *relCacheBuffer = RelCacheTable::relCache[relId];
-
-	//* because we are not modifying the attribute cache at this stage,
-	//* write-back is not required. We will do it in subsequent
-  	//* stages when it becomes needed)
-
+	/*-----free the attrcache in the cache-----*/
 	AttrCacheEntry *head = AttrCacheTable::attrCache[relId];
 	AttrCacheEntry *next = head->next;
 

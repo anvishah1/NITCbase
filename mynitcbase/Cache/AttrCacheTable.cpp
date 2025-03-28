@@ -96,7 +96,67 @@ void AttrCacheTable::recordToAttrCatEntry(
   // copy the rest of the fields in the record to the attrCacheEntry struct
 }
 
+//to set the attributecat entry of ONE attribute of ONE relation
+int AttrCacheTable::setAttrCatEntry(int relId,char attrName[ATTR_SIZE], AttrCatEntry * attrcatbuf){
+  if(relId < 0 || relId >MAX_OPEN){
+      return E_OUTOFBOUND;
+  }
+  //ensure that the relation is open by checking if there is an attrcacheentry
+  if(attrCache[relId]==nullptr){
+    return E_RELNOTOPEN;
+  }
+  //access the meta info about the first attribute of the relation
+  AttrCacheEntry *attrcacheentry = attrCache[relId];
+  //while there are attributes 
+  while(attrcacheentry){
+    //check if this is the correct attribute whose attributecat info we want to update
+    //this if loop runs only for one attribute that satisifes the condition
+    if(strcmp(attrcacheentry->attrCatEntry.attrName,attrName)==0){
+//update the values 
+      attrcacheentry->attrCatEntry.rootBlock=attrcatbuf->rootBlock;
+      attrcacheentry->attrCatEntry.offset=attrcatbuf->offset;
+      attrcacheentry->attrCatEntry.attrType=attrcatbuf->attrType;
+      attrcacheentry->attrCatEntry.primaryFlag=attrcatbuf->primaryFlag;
 
+      attrcacheentry->dirty==true;
+      return SUCCESS;
+    }
+    //iterate to next attribute metadata if this did not satisfy it 
+    attrcacheentry=attrcacheentry->next;
+  }
+  //if even after going over all attributes of the relation we still didnt loop out then that attribute does not exist for the relation 
+  return E_ATTRNOTEXIST;
+}
+
+
+//same thing using offset instead
+int AttrCacheTable::setAttrCatEntry(int relId,int attroffset, AttrCatEntry * attrcatbuf){
+  if(relId < 0 || relId >MAX_OPEN){
+      return E_OUTOFBOUND;
+  }
+  if(attrCache[relId]==nullptr){
+    return E_RELNOTOPEN;
+  }
+  AttrCacheEntry *attrcacheentry = attrCache[relId];
+  while(attrcacheentry){
+    if(attrcacheentry->attrCatEntry.offset==attroffset){
+      
+      attrcacheentry->attrCatEntry.rootBlock=attrcatbuf->rootBlock;
+      attrcacheentry->attrCatEntry.offset=attrcatbuf->offset;
+      attrcacheentry->attrCatEntry.attrType=attrcatbuf->attrType;
+      attrcacheentry->attrCatEntry.primaryFlag=attrcatbuf->primaryFlag;
+
+      attrcacheentry->dirty==true;
+      return SUCCESS;
+    }
+    attrcacheentry=attrcacheentry->next;
+  }
+  return E_ATTRNOTEXIST;
+}
+
+
+//to convert the attributecat entry into form of record that can be written back to the block
+//each index of the record stores one detail about the attribute form the attributecat entry of that attribute 
 void AttrCacheTable::attrCatEntryToRecord(AttrCatEntry *attrCatEntry, Attribute record[ATTRCAT_NO_ATTRS])
 {
     strcpy(record[ATTRCAT_REL_NAME_INDEX].sVal, attrCatEntry->relName);
@@ -106,9 +166,8 @@ void AttrCacheTable::attrCatEntryToRecord(AttrCatEntry *attrCatEntry, Attribute 
     record[ATTRCAT_PRIMARY_FLAG_INDEX].nVal = attrCatEntry->primaryFlag;
     record[ATTRCAT_ROOT_BLOCK_INDEX].nVal = attrCatEntry->rootBlock;
     record[ATTRCAT_OFFSET_INDEX].nVal = attrCatEntry->offset;
-
-    // copy the rest of the fields in the record to the attrCacheEntry struct
 }
+
 
 //get the search index using the attribute name 
 //to get the block number and the index(slot) of the index that last matched the search conditions i.e the record that matched the values
