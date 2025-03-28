@@ -166,6 +166,7 @@ int Schema::deleteRel(char *relName) {
 
    int ret = BlockAccess::deleteRelation(relName);
    return ret;
+<<<<<<< HEAD
 }
 
 int createIndex(char relName[ATTR_SIZE],char attrName[ATTR_SIZE]){
@@ -201,4 +202,6 @@ int dropIndex(char relName[ATTR_SIZE],char attrName[ATTR_SIZE]){
     attrcatbuf.rootBlock=-1;
     AttrCacheTable::setAttrCatEntry(relId,attrName,&attrcatbuf);
     return SUCCESS;
+=======
+>>>>>>> dccfb69fbaff2856a033d363167828f29362a29d
 }
