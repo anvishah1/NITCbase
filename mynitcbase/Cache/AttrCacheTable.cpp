@@ -110,6 +110,7 @@ void AttrCacheTable::attrCatEntryToRecord(AttrCatEntry *attrCatEntry, Attribute 
 
 int AttrCacheTable::setSearchIndex(int relId, char attrName[ATTR_SIZE], IndexId *searchIndex)
 {
+    //same as the getattrentry but instead we set it using the searchindex 
     if (relId < 0 || relId >= MAX_OPEN) return E_OUTOFBOUND;
 
     AttrCacheEntry *curr = AttrCacheTable::attrCache[relId];
@@ -179,12 +180,18 @@ int AttrCacheTable::getAttributeOffset(int relId, char attrName[ATTR_SIZE]) {
 
 int AttrCacheTable::getSearchIndex(int relId, char attrName[ATTR_SIZE], IndexId *searchIndex)
 {
-    if (relId < 0 || relId >= MAX_OPEN) return E_OUTOFBOUND;
+    //if relId is valid
+    if (relId < 0 || relId >= MAX_OPEN) 
+        return E_OUTOFBOUND;
 
+    //access the first attrcacheentry i.e the first attribute of the relation
     AttrCacheEntry *curr = AttrCacheTable::attrCache[relId];
+    //loop through all the attributes 
     while (curr) {
+        //if the attribute name matches 
         if (strcmp(curr->attrCatEntry.attrName, attrName) == 0)
         {
+            //get the searchindex
             *searchIndex = curr->searchIndex;
             return SUCCESS;
         }
@@ -196,11 +203,11 @@ int AttrCacheTable::getSearchIndex(int relId, char attrName[ATTR_SIZE], IndexId 
 
 int AttrCacheTable::getSearchIndex(int relId, int attrOffset, IndexId *searchIndex)
 {
+
     if (relId < 0 || relId >= MAX_OPEN) return E_OUTOFBOUND;
 
     AttrCacheEntry *curr = AttrCacheTable::attrCache[relId];
     int index = 0;
-
     while (curr) {
         if (index == attrOffset)
         {
@@ -214,15 +221,14 @@ int AttrCacheTable::getSearchIndex(int relId, int attrOffset, IndexId *searchInd
     return E_ATTRNOTEXIST;
 }
 
-//* returns the attrOffset-th attribute for the relation corresponding to relId
-//* NOTE: this function expects the caller to allocate memory for `*attrCatBuf`
+//edit the searchindex of the attribute using the attrcache 
 int AttrCacheTable::setAttrCatEntry(int relId, int attrOffset, AttrCatEntry *attrCatBuf)
 {
-    //! check if 0 <= relId < MAX_OPEN and return E_OUTOFBOUND otherwise
+    //! check if 0 <= relId < MAX_OPEN 
     if (relId < 0 || relId >= MAX_OPEN)
         return E_OUTOFBOUND;
 
-    //! check if attrCache[relId] == nullptr and return E_RELNOTOPEN if true
+    //before changing the attrcache ensure that the relation is open
     if (attrCache[relId] == nullptr)
         return E_RELNOTOPEN;
 

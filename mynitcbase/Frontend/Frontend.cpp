@@ -92,13 +92,7 @@ int Frontend::select_attrlist_from_table_where(char relname_source[ATTR_SIZE], c
 	return SUCCESS;
 }
 
-// int Frontend::select_from_join_where(char relname_source_one[ATTR_SIZE], char relname_source_two[ATTR_SIZE],
-// 									 char relname_target[ATTR_SIZE],
-// 									 char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE])
-// {
-// 	// Algebra::join
-// 	return SUCCESS;
-// }
+
 
 int Frontend::select_from_join_where(char relname_source_one[ATTR_SIZE], 
 										char relname_source_two[ATTR_SIZE], 
@@ -106,12 +100,8 @@ int Frontend::select_from_join_where(char relname_source_one[ATTR_SIZE],
 										char join_attr_one[ATTR_SIZE], 
 										char join_attr_two[ATTR_SIZE]) 
 {
-    // Call join() method of the Algebra Layer with correct arguments
 	return Algebra::join(relname_source_one, relname_source_two, 
 							relname_target, join_attr_one, join_attr_two);
-
-    // Return Success or Error values appropriately
-	// return ret;
 }
 
 
@@ -125,7 +115,8 @@ int Frontend::select_attrlist_from_join_where(char relname_source_one[ATTR_SIZE]
 	// Algebra::join + project
 	int ret = Algebra::join(relname_source_one, relname_source_two, 
 							"temp_relation", join_attr_one, join_attr_two);
-	if (ret != SUCCESS) return ret;
+	if (ret != SUCCESS) 
+	return ret;
 
 	ret = Algebra::project("temp_relation", relname_target, attr_count, attr_list);
 	OpenRelTable::closeRel(OpenRelTable::getRelId("temp_relation"));

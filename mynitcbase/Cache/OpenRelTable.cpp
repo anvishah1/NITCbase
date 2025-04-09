@@ -372,12 +372,6 @@ int OpenRelTable::closeRel(int relId) {
 	// free the memory allocated in the relation and attribute caches which was
 	// allocated in the OpenRelTable::openRel() function
 	free (RelCacheTable::relCache[relId]);
-	
-	// // RelCacheEntry *relCacheBuffer = RelCacheTable::relCache[relId];
-
-	//* because we are not modifying the attribute cache at this stage,
-	//* write-back is not required. We will do it in subsequent
-  	//* stages when it becomes needed)
 
 	AttrCacheEntry *head = AttrCacheTable::attrCache[relId];
 	AttrCacheEntry *next = head->next;
@@ -400,7 +394,6 @@ int OpenRelTable::closeRel(int relId) {
 		next = next->next;
 	}
 
-	// update `tableMetaInfo` to set `relId` as a free slot
 	// update `relCache` and `attrCache` to set the entry at `relId` to nullptr
 	tableMetaInfo[relId].free = true;
 	RelCacheTable::relCache[relId] = nullptr;

@@ -161,14 +161,6 @@ int Schema::createRel(char relName[],int nAttrs, char attrs[][ATTR_SIZE],int att
 
         // retVal = BlockAccess::insert(ATTRCAT_RELID(=1), attrCatRecord);
 		retVal = BlockAccess::insert(ATTRCAT_RELID, attrCatRecord);
-
-        /* if attribute catalog insert fails:
-             delete the relation by calling deleteRel(targetrel) of schema layer
-             return E_DISKFULL
-            * (this is necessary because we had already created the
-            * relation catalog entry which needs to be removed)
-        */
-
 	   	if (retVal != SUCCESS) {
 			Schema::deleteRel(relName);
 			return E_DISKFULL;
@@ -208,17 +200,13 @@ int Schema::deleteRel(char *relName) {
 
 int Schema::createIndex(char relName[ATTR_SIZE],char attrName[ATTR_SIZE]){
     // if the relName is either Relation Catalog or Attribute Catalog,
-        // return E_NOTPERMITTED
-        // (check if the relation names are either "RELATIONCAT" and "ATTRIBUTECAT".
-        // you may use the following constants: RELCAT_NAME and ATTRCAT_NAME)
     if (strcmp(relName, RELCAT_RELNAME) == 0 || strcmp(relName, ATTRCAT_RELNAME) == 0)
         return E_NOTPERMITTED;
 
-    // get the relation's rel-id using OpenRelTable::getRelId() method
+    // get the relation's rel-id 
     int relId = OpenRelTable::getRelId(relName);
 
     // if relation is not open in open relation table, return E_RELNOTOPEN
-    // (check if the value returned from getRelId function call = E_RELNOTOPEN)
     if (relId == E_RELNOTOPEN)
         return E_RELNOTOPEN;
 
@@ -227,19 +215,14 @@ int Schema::createIndex(char relName[ATTR_SIZE],char attrName[ATTR_SIZE]){
 }
 
 int Schema::dropIndex(char *relName, char *attrName) {
-    // if the relName is either Relation Catalog or Attribute Catalog,
-        // return E_NOTPERMITTED
-        // (check if the relation names are either "RELATIONCAT" and "ATTRIBUTECAT".
-        // you may use the following constants: RELCAT_NAME and ATTRCAT_NAME)
-
+    // if the relName is either Relation Catalog or Attribute Catalog
     if (strcmp(relName, RELCAT_RELNAME) == 0 || strcmp(relName, ATTRCAT_RELNAME) == 0)
         return E_NOTPERMITTED;
 
-    // get the rel-id using OpenRelTable::getRelId()
+    // get the rel-id 
     int relId = OpenRelTable::getRelId(relName);
 
     // if relation is not open in open relation table, return E_RELNOTOPEN
-    // (check if the value returned from getRelId function call = E_RELNOTOPEN)
     if (relId == E_RELNOTOPEN)
         return E_RELNOTOPEN;
 
