@@ -477,22 +477,17 @@ int BPlusTree::splitLeaf(int leafBlockNum, Index indices[]) {
 
 int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE], 
                                     int intBlockNum, InternalEntry intEntry) {
-    // get the attribute cache entry corresponding to attrName
-    // using AttrCacheTable::getAttrCatEntry().
+
+
     AttrCatEntry attrCatEntryBuffer;
     AttrCacheTable::getAttrCatEntry(relId, attrName, &attrCatEntryBuffer);
 
-    // declare intBlk, an instance of IndInternal using constructor 2 for the block
-    // corresponding to intBlockNum
     IndInternal internalBlock (intBlockNum);
 
     HeadInfo blockHeader;
-    // load blockHeader with header of intBlk using BlockBuffer::getHeader().
     internalBlock.getHeader(&blockHeader);
-
-    // declare internalEntries to store all existing entries + the new entry
     InternalEntry internalEntries[blockHeader.numEntries + 1];
-    // bool inserted = false;
+
     int insertedIndex = -1;
     for (int entryindex = 0; entryindex < blockHeader.numEntries; entryindex++)
     {
@@ -555,13 +550,6 @@ int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE],
 
         return SUCCESS;
     }
-
-    // If we reached here, the `internalEntries` array has more than entries than
-    // can fit in a single internal index block. Therefore, we will need to split
-    // the entries in `internalEntries` between two internal index blocks. We do
-    // this using the splitInternal() function.
-    // This function will return the blockNum of the newly allocated block or
-    // E_DISKFULL if there are no more blocks to be allocated.
 
     int newRightBlk = splitInternal(intBlockNum, internalEntries);
 
