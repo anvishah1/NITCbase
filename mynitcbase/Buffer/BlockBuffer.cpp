@@ -28,11 +28,9 @@ BlockBuffer::BlockBuffer(char blockType){
 
   int blocknum=getFreeBlock(type);
   this->blockNum=blocknum;
-  }
 
-BlockBuffer::BlockBuffer(int blockNum) {
-  this->blockNum = blockNum;
 }
+
 RecBuffer::RecBuffer() : BlockBuffer('R') {}
 RecBuffer::RecBuffer(int blockNum) : BlockBuffer::BlockBuffer(blockNum) {}
 IndBuffer::IndBuffer(char blockType) : BlockBuffer(blockType){}//constructor called if a new index block of the blocktype either leaf index or internal has to be allocated
